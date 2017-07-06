@@ -220,15 +220,31 @@ PCB* choose_process ()
 
 //run new process (3b)
     int s = new_list.size();
-    
-    if(s < 1){
+    int f;
+    int status;
+
+    if(s > 1){
         ;}
     else{
         processes.splice (processes.end(), new_list, new_list.begin())
 
-    processes.end->state = RUNNING;
+    for(int i = processes.size(), i > 0, i--){
+      if(processes[i]->state.equals(READY){
+        processes[i]->state = RUNNING;
 
-    
+        if((f = fork()) < 0)
+            perror("Error");
+
+        else if(f == 0){
+            processes[i]->pid = getpid();
+            execl();}
+
+        else{
+            waitpid(f, &status, 0);
+            if(WIFEXITED(status))
+        }
+
+    } }
 
 
     return idle;
@@ -357,6 +373,15 @@ int main (int argc, char **argv)
 
 // add argv's to new_list 
     while(argc > 1){
+        argv = new (PCB);
+        argv->state = READY;
+        argv->name = argv;
+        argv->pid = 0;
+        argv->ppid = getpid();
+        argv->interrupts = 0;
+        argv->switches = 0;
+        argv->started = sys_time;
+
         new_list.push_back (argv[argc]);
         argc--;
     }
