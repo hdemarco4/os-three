@@ -210,12 +210,25 @@ struct sigaction *create_handler (int signum, void (*handler)(int))
     return (action);
 }
 
+
 PCB* choose_process ()
 {
+//update running PCB (3a)
     running->interrupts = running->interrupts +1;
     running->switches = running->switches+1;
     running->state = READY;
 
+//run new process (3b)
+    int s = new_list.size();
+    
+    if(s < 1){
+        ;}
+    else{
+        processes.splice (processes.end(), new_list, new_list.begin())
+
+    processes.end->state = RUNNING;
+
+    
 
 
     return idle;
@@ -341,6 +354,12 @@ int main (int argc, char **argv)
     sys_time = 0;
 
     boot (pid);
+
+// add argv's to new_list 
+    while(argc > 1){
+        new_list.push_back (argv[argc]);
+        argc--;
+    }
 
     // create a process to soak up cycles
     create_idle ();
