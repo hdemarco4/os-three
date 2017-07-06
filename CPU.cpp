@@ -226,10 +226,11 @@ PCB* choose_process ()
     if(s > 1){
         ;}
     else{
-        processes.splice (processes.end(), new_list, new_list.begin())
+        processes.splice (processes.end(), new_list, new_list.begin());
+    }
 
-    for(int i = processes.size(), i > 0, i--){
-      if(processes[i]->state.equals(READY){
+    for(int i = processes.size(); i > 0; i--){
+      if(processes[i]->state.equals(READY)){
         processes[i]->state = RUNNING;
 
         if((f = fork()) < 0)
@@ -373,16 +374,16 @@ int main (int argc, char **argv)
 
 // add argv's to new_list 
     while(argc > 1){
-        argv = new (PCB);
-        argv->state = READY;
-        argv->name = argv;
-        argv->pid = 0;
-        argv->ppid = getpid();
-        argv->interrupts = 0;
-        argv->switches = 0;
-        argv->started = sys_time;
+        PCB* process = new (PCB);
+        process->state = READY;
+        process->name = argv[argc];
+        process->pid = 0;
+        process->ppid = getpid();
+        process->interrupts = 0;
+        process->switches = 0;
+        process->started = sys_time;
 
-        new_list.push_back (argv[argc]);
+        new_list.push_back (process);
         argc--;
     }
 
