@@ -215,15 +215,15 @@ struct sigaction *create_handler (int signum, void (*handler)(int))
 PCB* choose_process ()
 {
 //update running PCB (3a)
-    running->interrupts = running->interrupts +1;
-    running->switches = running->switches+1;
-    running->state = READY;
-    processes.push_back(running);
-
+    if(running == idle){
+        running->interrupts = running->interrupts +1;
+        running->switches = running->switches+1;
+        running->state = READY;
+        processes.push_back(running);
+    }
 //move new process (3b)
     int s = new_list.size();
     int f;
-    int status;
 
     if(s < 1){
         ;}
@@ -236,27 +236,22 @@ PCB* choose_process ()
         running = processes.front();
         processes.pop_front();
 
-      if(running->state==READY){
-        running->state = RUNNING;
+        if(running->state==READY){
+            running->state = RUNNING;
 
-        if((f = fork()) < 0)
-            perror("Error");
+            if((f = fork()) < 0)
+                perror("Error");
 
-        else if(f == 0){
-            running->pid = getpid();
-            execl("./a.out", "process", NULL, (char*)NULL);}
-
-        else{
-            waitpid(f, &status, 0);
-
-            running->state = TERMINATED;
-            processes.push_back(running);
-        }
-
-    }
-    else{
-        processes.push_back(running);
-    }
+            else if(f == 0){
+                running->pid = getpid();
+                execl("./a.out", "process", NULL, (char*)NULL);
+            
+                kill(running->pid, SIGCHLD);
+            } 
+      }
+      else{
+          processes.push_back(running);
+      }
  }
 
 
@@ -300,7 +295,18 @@ void process_done (int signum)
     else
     {
         dprint (WEXITSTATUS (status));
+        dprint (running->state);
+        dprint (running->name);
+        dprint (running->pid);
+        dprint (running->ppid);
+        dprint (running->interrupts);
+        dprint (running->switches);
+        dprint (running->started);
+
+        running->state = TERMINATED;
     }
+
+    running = idle;
 }
 
 /*
