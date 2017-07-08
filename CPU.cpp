@@ -72,6 +72,7 @@ Add the following functionality.
     c) Start the idle process to use the rest of the time slice.
 */
 
+//changed seconds to 20 (1)
 #define NUM_SECONDS 20
 
 // make sure the asserts work
@@ -217,35 +218,46 @@ PCB* choose_process ()
     running->interrupts = running->interrupts +1;
     running->switches = running->switches+1;
     running->state = READY;
+    processes.push_back(running);
 
-//run new process (3b)
+//move new process (3b)
     int s = new_list.size();
     int f;
     int status;
 
-    if(s > 1){
+    if(s < 1){
         ;}
     else{
         processes.splice (processes.end(), new_list, new_list.begin());
     }
 
+//run ready processes (3c)
     for(int i = processes.size(); i > 0; i--){
-      if(processes[i]->state.equals(READY)){
-        processes[i]->state = RUNNING;
+        running = processes.front();
+        processes.pop_front();
+
+      if(running->state==READY){
+        running->state = RUNNING;
 
         if((f = fork()) < 0)
             perror("Error");
 
         else if(f == 0){
-            processes[i]->pid = getpid();
-            execl();}
+            running->pid = getpid();
+            execl("./a.out", "process", NULL, (char*)NULL);}
 
         else{
             waitpid(f, &status, 0);
-            if(WIFEXITED(status))
+
+            running->state = TERMINATED;
+            processes.push_back(running);
         }
 
-    } }
+    }
+    else{
+        processes.push_back(running);
+    }
+ }
 
 
     return idle;
