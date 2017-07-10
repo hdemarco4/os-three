@@ -235,7 +235,9 @@ PCB* choose_process ()
 
         if(running->state==READY){
             running->state = RUNNING;
-            string path = string("./") + running->name;
+if(running->name==NULL)
+    running->name = "empty";
+            string path = string("./") +string(running->name);
             running->switches = running->switches+1;
 
             if((f = fork()) < 0)
@@ -384,7 +386,7 @@ int main (int argc, char **argv)
 
 // add argv's to new_list (2)
     int nn = argc;
-    while(nn > 1){
+    while(nn > 0){
         PCB* process = new (PCB);
         process->state = READY;
         process->name = argv[nn];
