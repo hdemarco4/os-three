@@ -215,12 +215,9 @@ struct sigaction *create_handler (int signum, void (*handler)(int))
 PCB* choose_process ()
 {
 //update running PCB (3a)
-    if(running == idle){
         running->interrupts = running->interrupts +1;
-        running->switches = running->switches+1;
         running->state = READY;
         processes.push_back(running);
-    }
 //move new process (3b)
     int s = new_list.size();
     int f;
@@ -228,7 +225,7 @@ PCB* choose_process ()
     if(s < 1){
         ;}
     else{
-        processes.splice (processes.end(), new_list, new_list.begin());
+        processes.splice (processes.begin(), new_list, new_list.begin());
     }
 
 //run ready processes (3c)
@@ -238,16 +235,17 @@ PCB* choose_process ()
 
         if(running->state==READY){
             running->state = RUNNING;
+            string path = string("./") + running->name;
+            running->switches = running->switches+1;
 
             if((f = fork()) < 0)
                 perror("Error");
 
             else if(f == 0){
                 running->pid = getpid();
-                execl("./a.out", "process", NULL, (char*)NULL);
+                execl(path.c_str(), running->name, NULL, (char*)NULL);
             
-                kill(running->pid, SIGCHLD);
-            } 
+            }
       }
       else{
           processes.push_back(running);
@@ -295,13 +293,7 @@ void process_done (int signum)
     else
     {
         dprint (WEXITSTATUS (status));
-        dprint (running->state);
-        dprint (running->name);
-        dprint (running->pid);
-        dprint (running->ppid);
-        dprint (running->interrupts);
-        dprint (running->switches);
-        dprint (running->started);
+        cout << running;
 
         running->state = TERMINATED;
     }
@@ -390,11 +382,12 @@ int main (int argc, char **argv)
 
     boot (pid);
 
-// add argv's to new_list 
-    while(argc > 1){
+// add argv's to new_list (2)
+    int nn = argc;
+    while(nn > 1){
         PCB* process = new (PCB);
         process->state = READY;
-        process->name = argv[argc];
+        process->name = argv[nn];
         process->pid = 0;
         process->ppid = getpid();
         process->interrupts = 0;
@@ -402,7 +395,7 @@ int main (int argc, char **argv)
         process->started = sys_time;
 
         new_list.push_back (process);
-        argc--;
+        nn--;
     }
 
     // create a process to soak up cycles
